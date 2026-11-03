@@ -11,6 +11,12 @@ import wave
 w=wave.open(wav);pcm=np.frombuffer(w.readframes(w.getnframes()),np.int16);audio=(pcm/32768).astype(np.float32)
 from faster_whisper import WhisperModel
 mp=a.model
+kit=os.path.join(os.path.dirname(os.path.abspath(__file__)),'model','small')
+if not os.path.exists(os.path.join(kit,'model.bin')) and os.path.isdir(kit):
+    import glob
+    with open(os.path.join(kit,'model.bin'),'wb') as f:
+        for part in sorted(glob.glob(os.path.join(kit,'model.bin.part-*'))): f.write(open(part,'rb').read())
+if mp=='small' and os.path.exists(os.path.join(kit,'model.bin')): mp=kit
 for cand in [mp, os.path.join(os.path.dirname(__file__),'..','..','model',mp), os.path.expanduser(f'~/model/{mp}')]:
     if os.path.isdir(cand): mp=cand;break
 m=WhisperModel(mp,device='cpu',compute_type='int8',cpu_threads=os.cpu_count())
